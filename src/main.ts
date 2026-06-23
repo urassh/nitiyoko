@@ -1,6 +1,12 @@
 import { app, BrowserWindow, screen } from "electron";
 import path from "node:path";
 
+try {
+  process.loadEnvFile();
+} catch {
+  console.warn(".env が見つかりません。Supabase 接続情報が未設定です。");
+}
+
 function createWindow(): void {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 
@@ -20,6 +26,11 @@ function createWindow(): void {
     backgroundColor: "#00000000",
     webPreferences: {
       contextIsolation: true,
+      preload: path.join(import.meta.dirname, "preload.cjs"),
+      additionalArguments: [
+        `--supabase-url=${process.env.SUPABASE_URL ?? ""}`,
+        `--supabase-publishable-key=${process.env.SUPABASE_PUBLISHABLE_KEY ?? ""}`,
+      ],
     },
   });
 

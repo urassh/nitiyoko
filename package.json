@@ -5,7 +5,7 @@
   "main": "dist/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc && cp src/index.html src/style.css dist/",
+    "build": "tsc && cp src/index.html src/style.css src/preload.cjs dist/",
     "dev": "npm run build && electron ."
   },
   "keywords": [],
