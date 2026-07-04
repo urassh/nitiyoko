@@ -1,5 +1,5 @@
 import { createClient, type RealtimeChannel } from "@supabase/supabase-js";
-import type { Comment, CommentSource } from "./comment.js";
+import type { Comment, CommentSource, Stamp } from "./comment.js";
 
 export class SupabaseCommentSource implements CommentSource {
   private supabase = createClient(
@@ -7,6 +7,7 @@ export class SupabaseCommentSource implements CommentSource {
     window.supabaseEnv.publishableKey
   );
   private readonly handlers = new Set<(comment: Comment) => void>();
+  private readonly stampHandlers = new Set<(stamp: Stamp) => void>();
   private channel: RealtimeChannel | null = null;
 
   constructor(private readonly roomId: string) {}
@@ -19,6 +20,11 @@ export class SupabaseCommentSource implements CommentSource {
       .on("broadcast", { event: "new_comment" }, (payload) => {
         const comment: Comment = payload.payload;
         this.handlers.forEach((handler) => handler(comment));
+      })
+      .on("broadcast", { event: "new_stamp" }, (payload) => {
+        // 画像そのものではなくコードだけが送られてくる
+        const stamp: Stamp = payload.payload;
+        this.stampHandlers.forEach((handler) => handler(stamp));
       })
       .subscribe();
   }
@@ -34,6 +40,13 @@ export class SupabaseCommentSource implements CommentSource {
     this.handlers.add(handler);
     return () => {
       this.handlers.delete(handler);
+    };
+  }
+
+  subscribeStamps(handler: (stamp: Stamp) => void): () => void {
+    this.stampHandlers.add(handler);
+    return () => {
+      this.stampHandlers.delete(handler);
     };
   }
 }

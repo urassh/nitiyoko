@@ -9,5 +9,6 @@ const stage = new CommentStage(
 const source: CommentSource = new SupabaseCommentSource("default");
 
 source.subscribe((comment) => stage.spawn(comment));
+source.subscribeStamps((stamp) => stage.spawnStamp(stamp));
 source.start();
 

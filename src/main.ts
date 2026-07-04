@@ -2,7 +2,11 @@ import { app, BrowserWindow, screen } from "electron";
 import path from "node:path";
 
 try {
-  process.loadEnvFile();
+  // パッケージ版では .env は Resources に同梱される（package.json の extraResources）
+  const envPath = app.isPackaged
+    ? path.join(process.resourcesPath, ".env")
+    : path.join(process.cwd(), ".env");
+  process.loadEnvFile(envPath);
 } catch {
   console.warn(".env が見つかりません。Supabase 接続情報が未設定です。");
 }

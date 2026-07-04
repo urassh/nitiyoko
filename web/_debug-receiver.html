@@ -33,6 +33,9 @@
         .on("broadcast", { event: "new_comment" }, (payload) => {
           log("RECEIVED: " + JSON.stringify(payload.payload), "ok");
         })
+        .on("broadcast", { event: "new_stamp" }, (payload) => {
+          log("RECEIVED stamp: " + JSON.stringify(payload.payload), "ok");
+        })
         .subscribe((status, err) => {
           stateEl.textContent = "status: " + status + (err ? " err=" + err : "");
           log("subscribe status: " + status + (err ? " err=" + err : ""), status === "SUBSCRIBED" ? "ok" : "ng");
