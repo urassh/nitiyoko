@@ -1,11 +1,12 @@
 import type { CommentSource } from "./comment.js";
 import { CommentStage } from "./comment-stage.js";
-import { RandomCommentSource } from "./random-comment-source.js";
+import { SupabaseCommentSource } from "./supabase-comment-source.js";
 
 const stage = new CommentStage(
   document.getElementById("stage") as HTMLDivElement,
 );
-const source: CommentSource = new RandomCommentSource();
+// web/index.html の送信側と同じルームに接続する
+const source: CommentSource = new SupabaseCommentSource("default");
 
 source.subscribe((comment) => stage.spawn(comment));
 source.start();
