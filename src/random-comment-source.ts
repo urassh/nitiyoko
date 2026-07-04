@@ -1,4 +1,5 @@
-import type { Comment, CommentSource } from "./comment.js";
+import type { Comment, CommentSource, Stamp } from "./comment.js";
+import { STAMPS } from "./stamps.js";
 import { pick, randInt } from "./random.js";
 
 export class RandomCommentSource implements CommentSource {
@@ -23,6 +24,7 @@ export class RandomCommentSource implements CommentSource {
   ];
 
   private readonly handlers = new Set<(comment: Comment) => void>();
+  private readonly stampHandlers = new Set<(stamp: Stamp) => void>();
   private timer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
@@ -49,6 +51,13 @@ export class RandomCommentSource implements CommentSource {
     };
   }
 
+  subscribeStamps(handler: (stamp: Stamp) => void): () => void {
+    this.stampHandlers.add(handler);
+    return () => {
+      this.stampHandlers.delete(handler);
+    };
+  }
+
   private scheduleNext(): void {
     const delay = randInt(this.minDelayMs, this.maxDelayMs);
     this.timer = setTimeout(() => {
@@ -58,6 +67,12 @@ export class RandomCommentSource implements CommentSource {
   }
 
   private emit(): void {
+    // たまにスタンプも混ぜて流す
+    if (Math.random() < 0.15) {
+      const stamp: Stamp = { code: pick(Object.keys(STAMPS)) };
+      for (const handler of this.stampHandlers) handler(stamp);
+      return;
+    }
     const comment: Comment = { text: pick(RandomCommentSource.MESSAGES) };
     for (const handler of this.handlers) handler(comment);
   }
